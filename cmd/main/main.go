@@ -51,6 +51,7 @@ func main() {
 	todos := server.Group("/todos")
 
 	// TODO: get all todos
+	// http://localhost:3000/todos
 	todos.Get("/:page<int>?:title?", func(c *fiber.Ctx) error {
 		todos := new([]Todo)
 		pageStr := c.Query("page", "0")
@@ -93,6 +94,7 @@ func main() {
 	})
 
 	// TODO: get todo by id
+	// http://localhost:3000/todos/:id
 	todos.Get("/:id<int64>", func(c *fiber.Ctx) error {
 		todo := new(Todo)
 		id := c.Params("id")
@@ -106,6 +108,7 @@ func main() {
 	})
 
 	// TODO: create todo
+	// http://localhost:3000/todos/
 	todos.Post("/", func(c *fiber.Ctx) error {
 		todo := new(Todo)
 
@@ -122,6 +125,7 @@ func main() {
 	})
 
 	// TODO: update todo
+	// http://localhost:3000/todos/:id
 	todos.Put("/:id<int64>", func(c *fiber.Ctx) error {
 		todo := new(Todo)
 		id := c.Params("id")
@@ -149,6 +153,7 @@ func main() {
 	})
 
 	// TODO: delete todo
+	// http://localhost:3000/todos/:id
 	todos.Delete("/:id<int64>", func(c *fiber.Ctx) error {
 		id := c.Params("id")
 

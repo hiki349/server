@@ -25,3 +25,8 @@ sudo pacman -S go
 ```sh
 go run cmd/main/main.go
 ```
+
+## Final your server start on
+```sh
+http://localhost:3000/
+```

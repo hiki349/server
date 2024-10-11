@@ -2,17 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/redis/go-redis/v9"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 )
@@ -40,11 +36,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-		DB:   0,
-	})
-
 	server := fiber.New()
 	server.Use(cors.New())
 
@@ -62,17 +53,6 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).JSON(map[string]string{"err": err.Error()})
 		}
 
-		cacheKey := fmt.Sprintf("todos_page_%s_title_%s", pageStr, title)
-
-		cachedTodos, err := rdb.Get(c.Context(), cacheKey).Result()
-		if err == nil {
-			cached := new([]Todo)
-			err = json.Unmarshal([]byte(cachedTodos), &cached)
-			if err == nil {
-				return c.JSON(cached)
-			}
-		}
-
 		query := db.NewSelect().Model(todos).Offset(page * 5).Limit(5)
 		if title != "" {
 			query = query.Where("title ILIKE ?", "%"+title+"%")
@@ -83,11 +63,6 @@ func main() {
 			return c.Status(fiber.StatusInternalServerError).JSON(map[string]string{"err": err.Error()})
 		} else if len(*todos) == 0 {
 			return c.Status(fiber.StatusNotFound).JSON(map[string]string{"err": "No todos found"})
-		}
-
-		todosJSON, err := json.Marshal(todos)
-		if err == nil {
-			rdb.Set(c.Context(), cacheKey, todosJSON, 30*time.Minute)
 		}
 
 		return c.JSON(todos)
